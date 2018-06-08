@@ -1,0 +1,19 @@
+{
+  "name": "QT__Drag-Converter",
+  "content_security_policy" : "script-src 'self' https://unpkg.com/axios/dist/axios.min.js; object-src 'self'",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "드래그 번역 확장 프로그램",
+  "browser_action": {
+    "default_icon": "./images/favicon.png",
+    "default_popup": "popup.html",
+    "default_title": "QT__Drag-Converter"
+  },
+  "permissions": [
+    "https://*/*",
+    "http://*/*",
+    "tabs",
+    "storage",
+    "activeTab"
+  ]
+}
