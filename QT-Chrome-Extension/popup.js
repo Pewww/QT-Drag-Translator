@@ -2,6 +2,7 @@
   getSelectedText();
   translateEvent();
   copyResult();
+  textToSpeech();
 }());
 
 
@@ -12,12 +13,8 @@ function getSelectedText () {
   chrome.tabs.executeScript({
     code: 'window.getSelection().toString();'
   }, (selection) => {
-    inputText.innerText = selection;
-    chrome.storage.sync.set({
-      textData: selection
-    }, () => { 
-      console.log('Saved Successfully!');
-    })
+    inputText.value = selection;
+    console.log(`드래그한 텍스트: ${selection}`);
   });
 }
 
@@ -41,21 +38,23 @@ function translateEvent () {
 // API 정보 요청 후 실제 적용
 function getPapagoResult () {
   let papagoResult = document.getElementById('papago-translated-form');
+  let inputText = document.getElementById('get-selected-text-form');
 
   // 번역할 텍스트 가져와서 적용
-  chrome.storage.sync.get(val => {
-    const query = val.textData.join('');
-    axios.post('http://localhost:3000/api/translation', {
-      text: query,
-      language: selectLanguage()
-    })
-    .then(response => {
-      console.log(response);
-      papagoResult.innerText = response.data.translatedText;
-    })
-    .catch(err => {
-      console.log(err);
+  const query = inputText.value;
+  axios.post('http://localhost:3000/api/translation', {
+    text: query,
+    language: selectLanguage()
+  })
+  .then(response => {
+    papagoResult.value = response.data.translatedText;
+    // 변환할 언어 저장
+    chrome.storage.sync.set({
+      resultLang: selectLanguage()
     });
+  })
+  .catch(err => {
+    console.log(err);
   });
 }
 
@@ -78,4 +77,59 @@ function copyText () {
     success.classList.remove('success-animation');
     setTimeout(() => success.classList.add('success-animation'), 0);
   }
+}
+
+// 클릭 시 텍스트를 음성으로 변환
+function textToSpeech () {
+  const speechBtn = document.querySelector('.result-speech');
+  speechBtn.addEventListener('click', () => {
+    speech();
+  });
+}
+
+function speech () {
+  function changeLanguage (val) {
+    let langVal = '';
+
+    switch (val.resultLang) {
+      case 'ko':
+        langVal = 'ko-kr';
+        break;
+      case 'en':
+        langVal = 'en-us';
+        break;
+      case 'zh-CN':
+      case 'zh-TW':
+        langVal = 'zh-cn';
+        break;
+      case 'es':
+        langVal = 'es-es';
+        break;
+      case 'fr':
+        langVal = 'fr-fr';
+        break;
+      case 'th':
+        langVal = 'zh-tw';
+        break;
+      case 'id':
+        langVal = 'en-in';
+        break;
+      default: break;
+    }
+
+    return langVal;
+  }
+  const papagoResult = document.getElementById('papago-translated-form');
+
+  chrome.storage.sync.get(val => {
+    VoiceRSS.speech({
+      key: 'ce16b05fac694b14b2221b9ccb687746',
+      src: papagoResult.value, //나는 형식만 맞춰주면 됨
+      hl: changeLanguage(val),
+      r: 0,
+      c: 'mp3',
+      f: '44khz_16bit_stereo',
+      ssml: false
+    });
+  });
 }

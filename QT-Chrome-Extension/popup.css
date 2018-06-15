@@ -125,15 +125,18 @@ select, select option {
 .etc-tool {
   width: 8%;
   height: 175px;
-  border-bottom: 1px solid gray;
   display: inline-block;
   vertical-align: top;
   margin: 20px 0 0 2%;
 }
 
-.copy-result {
+.etc-icons {
   width: 20px;
   display: block;
-  margin: 0.5rem 0;
+  margin: 0.5rem 0 0.75rem 0;
   cursor: pointer;
+}
+
+.etc-icons.result-speech {
+  width: 24px;
 }
