@@ -13,7 +13,7 @@ function getSelectedText () {
   chrome.tabs.executeScript({
     code: 'window.getSelection().toString();'
   }, (selection) => {
-    inputText.value = selection;
+    inputText.value = selection || '';
     console.log(`드래그한 텍스트: ${selection}`);
   });
 }
@@ -82,12 +82,14 @@ function copyText () {
 // 클릭 시 텍스트를 음성으로 변환
 function textToSpeech () {
   const speechBtn = document.querySelector('.result-speech');
+  const papagoResult = document.getElementById('papago-translated-form');
+
   speechBtn.addEventListener('click', () => {
-    speech();
+    speech(papagoResult.value);
   });
 }
 
-function speech () {
+function speech (resultVal) {
   function changeLanguage (val) {
     let langVal = '';
 
@@ -119,12 +121,11 @@ function speech () {
 
     return langVal;
   }
-  const papagoResult = document.getElementById('papago-translated-form');
 
   chrome.storage.sync.get(val => {
     VoiceRSS.speech({
       key: 'ce16b05fac694b14b2221b9ccb687746',
-      src: papagoResult.value, //나는 형식만 맞춰주면 됨
+      src: resultVal,
       hl: changeLanguage(val),
       r: 0,
       c: 'mp3',
